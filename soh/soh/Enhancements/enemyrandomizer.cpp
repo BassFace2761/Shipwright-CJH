@@ -69,12 +69,8 @@ const char* enemyCVarList[RANDOMIZED_ENEMY_SPAWN_TABLE_SIZE] = {
     CVAR_ENHANCEMENT("RandomizedEnemyList.Keese"),
     CVAR_ENHANCEMENT("RandomizedEnemyList.LargeBaba"),
     CVAR_ENHANCEMENT("RandomizedEnemyList.LikeLike"),
-    CVAR_ENHANCEMENT("RandomizedEnemyList.SmallLikeLike"),
-    CVAR_ENHANCEMENT("RandomizedEnemyList.GiantLikeLike"),
-    CVAR_ENHANCEMENT("RandomizedEnemyList.InvertedLikeLike"),
-    CVAR_ENHANCEMENT("RandomizedEnemyList.RupeeLike"),
-    CVAR_ENHANCEMENT("RandomizedEnemyList.LifeLike"),
-    CVAR_ENHANCEMENT("RandomizedEnemyList.MagicLike"),
+    CVAR_ENHANCEMENT("RandomizedEnemyList.LikeLike"),
+    CVAR_ENHANCEMENT("RandomizedEnemyList.LikeLike"),
     CVAR_ENHANCEMENT("RandomizedEnemyList.Lizalfos"),
     CVAR_ENHANCEMENT("RandomizedEnemyList.MadScrub"),
     CVAR_ENHANCEMENT("RandomizedEnemyList.NormalWolfos"),
@@ -138,13 +134,9 @@ const char* enemyNameList[RANDOMIZED_ENEMY_SPAWN_TABLE_SIZE] = {
     "Invisible Stalfos",
     "Keese",
     "Large Deku Baba",
-    "Like-Like",
-    "Small Like-Like",
-    "Giant Like-Like",
-    "Inverted Like-Like",
-    "Rupee-Like",
-    "Life-Like",
-    "Magic-Like",
+    "Random Like-Like 1",
+    "Random Like-Like 2",
+    "Random Like-Like 3",
     "Lizalfos",
     "Mad Scrub",
     "Wolfos (Normal)",
@@ -211,13 +203,9 @@ static EnemyEntry randomizedEnemySpawnTable[RANDOMIZED_ENEMY_SPAWN_TABLE_SIZE] =
     { ACTOR_EN_DEKUBABA, 1 },      // Deku Baba (large)
     // Doesn't work (reliant on surface, without a spawner it kills itself too quickly)
     // { ACTOR_EN_REEBA, 0 },       // Leever
-    { ACTOR_EN_RR, 0 },         // Like-Like
-    { ACTOR_EN_RR, 1 },         // Small Like-Like
-    { ACTOR_EN_RR, 3 },         // Giant Like-Like
-    { ACTOR_EN_RR, 4 },         // Inverted Like-Like
-    { ACTOR_EN_RR, 6 },         // Rupee-Like
-    { ACTOR_EN_RR, 7 },         // Life-Like
-    { ACTOR_EN_RR, 8 },         // Magic-Like
+    { ACTOR_EN_RR, 0 },         // Random Like-Like 1
+    { ACTOR_EN_RR, 0 },         // Random Like-Like 2
+    { ACTOR_EN_RR, 0 },         // Random Like-Like 3
     { ACTOR_EN_ZF, -1 },        // Lizalfos
     { ACTOR_EN_DEKUNUTS, 768 }, // Mad Scrub (triple attack) (projectiles don't work)
     { ACTOR_EN_WF, 0 },         // Wolfos (normal)
@@ -386,6 +374,31 @@ extern "C" uint8_t GetRandomizedEnemy(PlayState* play, int16_t* actorId, f32* po
 
         *actorId = randomEnemy.id;
         *params = randomEnemy.params;
+
+        if (*actorId == ACTOR_EN_RR) {
+            uint16_t newParams = 0;
+            
+            // SOH Random(min, max) is exclusive on the max value.
+            newParams |= Random(0, 2);        // Bit 0: Base Type (0=Steal, 1=Drain)
+            newParams |= (Random(0, 3) << 1); // Bits 1-2: Drain Subtype (0=Rupee, 1=Life, 2=Magic)
+            newParams |= (Random(0, 3) << 4); // Bits 4-5: Size (0=Norm, 1=Small, 2=Giant)
+            newParams |= (Random(0, 2) << 6); // Bit 6: Orientation (0=Floor, 1=Ceil)
+            newParams |= (Random(0, 2) << 7); // Bit 7: Movement (0=Roam, 1=Stat)
+            
+            *params = newParams;
+
+            if ((newParams >> 6) & 1) {
+                Vec3f start = { *posX, *posY, *posZ };
+                Vec3f end = { *posX, *posY + 2000.0f, *posZ }; 
+                Vec3f hitPos;
+                CollisionPoly* poly;
+                s32 bgId;
+                
+                if (BgCheck_EntityLineTest1(&play->colCtx, &start, &end, &hitPos, &poly, false, false, true, true, &bgId)) {
+                    *posY = hitPos.y; 
+                }
+            }
+        }
 
         // Straighten out enemies so they aren't flipped on their sides when the original spawn is.
         *rotX = 0;

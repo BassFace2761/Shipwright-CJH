@@ -97,6 +97,17 @@ static void ClearDeletedAssignedEquipment(int16_t equipmentType, uint16_t equipV
                 itemToRemove = ITEM_SHIELD_MIRROR;
                 break;
         }
+    } else if (equipmentType == EQUIP_TYPE_BOOTS) {
+        switch (equipValue) {
+            case EQUIP_VALUE_BOOTS_KOKIRI:
+                break;
+            case EQUIP_VALUE_BOOTS_IRON:
+                itemToRemove = ITEM_BOOTS_IRON;
+                break;
+            case EQUIP_VALUE_BOOTS_HOVER:
+                itemToRemove = ITEM_BOOTS_HOVER;
+                break;
+        }
     }
 
     if (itemToRemove == ITEM_NONE) {

@@ -50,6 +50,7 @@ typedef enum PlayerTunic {
     /* 0x00 */ PLAYER_TUNIC_KOKIRI,
     /* 0x01 */ PLAYER_TUNIC_GORON,
     /* 0x02 */ PLAYER_TUNIC_ZORA,
+               PLAYER_TUNIC_NONE,
     /* 0x03 */ PLAYER_TUNIC_MAX
 } PlayerTunic;
 

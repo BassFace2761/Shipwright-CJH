@@ -1108,6 +1108,7 @@ void Player_DrawImpl(PlayState* play, void** skeleton, Vec3s* jointTable, s32 dL
     gSPSegment(POLY_OPA_DISP++, 0x09, SEGMENTED_TO_VIRTUAL(sMouthTextures[eyeIndex]));
 #endif
 
+    Vec3f sWhiteVec = { 255.0f, 255.0f, 255.0f };
     Color_RGB8 sTemp;
     color = &sTunicColors[tunic];
     if (tunic == PLAYER_TUNIC_KOKIRI && CVarGetInteger(CVAR_COSMETIC("Link.KokiriTunic.Changed"), 0)) {
@@ -1119,6 +1120,8 @@ void Player_DrawImpl(PlayState* play, void** skeleton, Vec3s* jointTable, s32 dL
     } else if (tunic == PLAYER_TUNIC_ZORA && CVarGetInteger(CVAR_COSMETIC("Link.ZoraTunic.Changed"), 0)) {
         sTemp = CVarGetColor24(CVAR_COSMETIC("Link.ZoraTunic.Value"), sTunicColors[PLAYER_TUNIC_ZORA]);
         color = &sTemp;
+    } else if (tunic == PLAYER_TUNIC_NONE) {
+        color = &sWhiteVec;
     }
 
     if (GameInteractor_Should(VB_APPLY_TUNIC_COLOR, true, data, color)) {
@@ -1852,8 +1855,7 @@ void Player_ScanBoomerangTargets(PlayState* play, Player* this, Vec3f* start, Ve
 
     Vec3f lineDir = { lineVec.x / lineLen, lineVec.y / lineLen, lineVec.z / lineLen };
 
-    // Pass the literal ACTORCAT enums. Added ACTORCAT_PROP and ACTORCAT_SWITCH!
-    s32 categories[] = { ACTORCAT_ENEMY, ACTORCAT_MISC, ACTORCAT_PROP, ACTORCAT_SWITCH };
+    s32 categories[] = { ACTORCAT_ENEMY, ACTORCAT_BOSS, ACTORCAT_MISC, ACTORCAT_PROP, ACTORCAT_SWITCH };
 
     // Loop through all 4 categories
     for (int c = 0; c < 4; c++) {
@@ -1862,12 +1864,11 @@ void Player_ScanBoomerangTargets(PlayState* play, Player* this, Vec3f* start, Ve
             if (actor->update != NULL) {
 
                 // Allow the actor if it has the Z-Target flag, OR if it matches our specific IDs
-                u8 isTargetable = (actor->flags & ACTOR_FLAG_ATTENTION_ENABLED) || (actor->id == ACTOR_OBJ_TSUBO) ||
-                                  (actor->id == ACTOR_OBJ_KIBAKO) || (actor->id == ACTOR_EN_KUSA) ||
-                                  (actor->id == ACTOR_EN_KANBAN) ||
-                                  (actor->id == ACTOR_EN_ITEM00) || // Rupees, Hearts, Ammo
-                                  (actor->id == ACTOR_EN_SI) ||     // Skulltula Tokens
-                                  (actor->id == ACTOR_OBJ_SWITCH && (actor->params == 3 || actor->params == 4));
+                u8 isTargetable =
+                    (actor->flags & ACTOR_FLAG_ATTENTION_ENABLED) || (actor->id == ACTOR_OBJ_TSUBO) ||
+                    (actor->id == ACTOR_OBJ_KIBAKO) || (actor->id == ACTOR_EN_KUSA) || (actor->id == ACTOR_EN_KANBAN) ||
+                    (actor->id == ACTOR_EN_ITEM00) || (actor->id == ACTOR_EN_SI) ||
+                    (actor->id == ACTOR_OBJ_SWITCH && ((actor->params & 7) == 3 || (actor->params & 7) == 4));
 
                 if (isTargetable) {
 

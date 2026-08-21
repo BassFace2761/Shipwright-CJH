@@ -417,6 +417,10 @@ void HealthMeter_Draw(PlayState* play) {
             sVisualHealth = gSaveContext.health;
         }
 
+        if (sVisualHealth < 0) {
+            sVisualHealth = 0;
+        }
+
         if (sVisualHealth > gSaveContext.healthCapacity) {
             sVisualHealth = gSaveContext.health;
         }

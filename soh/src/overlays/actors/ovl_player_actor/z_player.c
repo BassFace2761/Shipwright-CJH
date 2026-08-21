@@ -3764,16 +3764,17 @@ void Player_UpdateShapeYaw(Player* this, PlayState* play) {
 
     if (!(this->stateFlags2 & (PLAYER_STATE2_DISABLE_ROTATION_Z_TARGET | PLAYER_STATE2_DISABLE_ROTATION_ALWAYS))) {
         if ((this->focusActor != NULL) &&
-            ((play->actorCtx.targetCtx.unk_4B != 0) || (this->actor.category != ACTORCAT_PLAYER))) {
+            ((play->actorCtx.targetCtx.unk_4B != 0) || (this->actor.category != ACTORCAT_PLAYER) ||
+             CVarGetInteger(CVAR_ENHANCEMENT("TargetBehind"), 0))) {
             Math_ScaledStepToS(&this->actor.shape.rot.y,
                                Math_Vec3f_Yaw(&this->actor.world.pos, &this->focusActor->focus.pos), 6000);
         } else if ((this->stateFlags1 & PLAYER_STATE1_PARALLEL) &&
                    !(this->stateFlags2 &
                      (PLAYER_STATE2_DISABLE_ROTATION_Z_TARGET | PLAYER_STATE2_DISABLE_ROTATION_ALWAYS))) {
-            Math_ScaledStepToS(&this->actor.shape.rot.y, this->parallelYaw, 4000);
+            Math_ScaledStepToS(&this->actor.shape.rot.y, this->parallelYaw, 6000);
         }
     } else if (!(this->stateFlags2 & PLAYER_STATE2_DISABLE_ROTATION_ALWAYS)) {
-        Math_ScaledStepToS(&this->actor.shape.rot.y, this->yaw, 2000);
+        Math_ScaledStepToS(&this->actor.shape.rot.y, this->yaw, 6000);
     }
 
     this->unk_87C = this->actor.shape.rot.y - previousYaw;
@@ -4157,9 +4158,9 @@ s32 Player_GetMovementSpeedAndYaw(Player* this, f32* outSpeedTarget, s16* outYaw
     if (!Player_CalcSpeedAndYawFromControlStick(play, this, outSpeedTarget, outYawTarget, speedMode)) {
         *outYawTarget = this->actor.shape.rot.y;
 
-        if (this->focusActor != NULL) {
-            if ((play->actorCtx.targetCtx.unk_4B != 0) &&
-                !(this->stateFlags2 & PLAYER_STATE2_DISABLE_ROTATION_ALWAYS)) {
+        if (this->focusActor != NULL) { 
+            if (CVarGetInteger(CVAR_ENHANCEMENT("TargetBehind"), 0) || ((play->actorCtx.targetCtx.unk_4B != 0) &&
+                !(this->stateFlags2 & PLAYER_STATE2_DISABLE_ROTATION_ALWAYS))) {
                 *outYawTarget = Math_Vec3f_Yaw(&this->actor.world.pos, &this->focusActor->focus.pos);
                 return false;
             }

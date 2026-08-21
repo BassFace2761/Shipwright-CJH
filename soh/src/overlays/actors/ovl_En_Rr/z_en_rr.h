@@ -9,16 +9,31 @@ struct EnRr;
 typedef void (*EnRrActionFunc)(struct EnRr*, PlayState*);
 
 typedef enum {
-    /*  0 */ LIKE_LIKE_NORMAL,
-    /*  1 */ LIKE_LIKE_SMALL,
-    /*  2 */ LIKE_LIKE_STATIONARY,
-    /*  3 */ LIKE_LIKE_GIANT,
-    /*  4 */ LIKE_LIKE_INVERT,
-    /*  5 */ LIKE_LIKE_STATIONARY_INVERT,
-    /*  6 */ RUPEE_LIKE,
-    /*  7 */ LIFE_LIKE,
-    /*  8 */ MAGIC_LIKE
-} LikeLikeParam;
+    RR_BASE_STEAL, // 0
+    RR_BASE_DRAIN  // 1
+} EnRrBaseType;
+
+typedef enum {
+    RR_DRAIN_RUPEE, // 0
+    RR_DRAIN_LIFE,  // 1
+    RR_DRAIN_MAGIC  // 2
+} EnRrDrainSubtype;
+
+typedef enum {
+    RR_SIZE_NORMAL, // 0
+    RR_SIZE_SMALL,  // 1
+    RR_SIZE_GIANT   // 2
+} EnRrSize;
+
+typedef enum {
+    RR_ORIENT_FLOOR, // 0
+    RR_ORIENT_CEIL   // 1
+} EnRrOrientation;
+
+typedef enum {
+    RR_MOVE_ROAMING, // 0
+    RR_MOVE_STAT     // 1
+} EnRrMovement;
 
 typedef enum LikeLikeBodyPart {
     /*  0 */ LIKE_LIKE_BODYPART_0,
@@ -79,6 +94,7 @@ typedef struct EnRr {
     bool reachUp;        // Returns true if the player is in a certain range above this actor.
     u8 reachState;
     bool vacuumCooldown;
+    bool tryScoop;
     u8 grabState;        // Like reachState, moves through grabStates with unique functionality.
     s8 grabDirection; // 1 = Head-first (from above), -1 = Feet-first (from below)
     bool storedPlayerIsFacing; // Determines player-to-Like Like facing direction at SetupGrab for use in ThrowPlayer.
@@ -89,6 +105,7 @@ typedef struct EnRr {
     u8 eatenShield;
     u8 eatenTunic;
     u8 eatenBoots;
+    u8 eatenStrength;
     u8 eatenItem;
     u8 eatenBottle;
     s8 msgEaten;    
@@ -99,7 +116,6 @@ typedef struct EnRr {
     u16 slimeCounter; 
     bool slimePlayer;    // Tacks on a speed debuff and makes player slippery. 
     bool retreat;
-    s32 phaseCycleTimer; // Along with count, replaces actionTimer to both govern and sync actions with segPhaseVel.
     u8 phaseCycleCount;
     f32 scrollControl;   // Dynamically controls texture scroll speed based on segPhaseVel.
     u8 soundTimer;       // Governs time between each grab sound trigger based on current segPhaseVel value.
@@ -128,15 +144,12 @@ typedef struct EnRr {
     f32 wobbleSizeTarget;
     f32 segScaleModY;    // Handles body "springiness".
     f32 segScaleModYTarget;
-    f32 innerMouthScale;
-    f32 innerMouthScaleTarget;
     f32 segMoveRate;
     f32 shrinkRate;
     f32 swallowOffset;
     u8 massRef;
     s16 bodyRadiusRef;
     s16 heightRef;
-    s16 yShiftRef;
     s16 mouthRadiusRef;
     f32 transitionRate;  // Rate in frames how quickly body motion changes between actions.
     f32 heightRate;

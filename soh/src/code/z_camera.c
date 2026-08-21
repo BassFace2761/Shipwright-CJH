@@ -1568,6 +1568,11 @@ s32 Camera_Free(Camera* camera, f32 minDist, f32 maxDist, f32 targetFov, s16 tar
     camera->play->camX += newCamX * (invertXAxis ? -1 : 1);
     camera->play->camY += newCamY * (CVarGetInteger(CVAR_SETTING("FreeLook.InvertYAxis"), 1) ? 1 : -1);
 
+
+    if (camera->setting == CAM_SET_NORMAL3) {
+        behavior = FREECAM_BEHAVIOR_ORBITAL; // Override when normal3 setting is active.
+    }
+
     s16 pitchRangeSetting = DEGF_TO_BINANG((f32)(CVarGetInteger(CVAR_SETTING("FreeLook.PitchRange"), 45)));
     s16 pitchLimit = behavior == FREECAM_BEHAVIOR_LINEAR ? pitchRangeSetting : CLAMP_MIN(0x3333, pitchRangeSetting);
 

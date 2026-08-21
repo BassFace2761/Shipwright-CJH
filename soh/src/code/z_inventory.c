@@ -235,9 +235,13 @@ u8 Inventory_DeleteEquipment(PlayState* play, s16 equipment) {
         gSaveContext.equips.equipment &= gEquipNegMasks[equipment];
         gSaveContext.inventory.equipment ^= OWNED_EQUIP_FLAG(equipment, equipValue - 1);
 
-        // if (equipment == EQUIP_TYPE_TUNIC) {
-        //     gSaveContext.equips.equipment |= EQUIP_VALUE_TUNIC_KOKIRI << (EQUIP_TYPE_TUNIC * 4);
-        // }
+        if (equipment == EQUIP_TYPE_TUNIC) {
+            gSaveContext.equips.equipment |= EQUIP_VALUE_TUNIC_NONE << gEquipShifts[EQUIP_TYPE_TUNIC];
+        }
+
+        if (equipment == EQUIP_TYPE_BOOTS) {
+            gSaveContext.equips.equipment |= EQUIP_VALUE_BOOTS_KOKIRI << gEquipShifts[EQUIP_TYPE_BOOTS];
+        }
 
         GameInteractor_ExecuteOnEquipmentDelete(equipment, equipValue);
 
