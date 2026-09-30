@@ -66,6 +66,8 @@ void func_80AEFF40(EnRu1* this, PlayState* play);
 
 void func_80AF0278(EnRu1* this, PlayState* play, s32 limbIndex, Vec3s* rot);
 
+void EnRu1_SwallowedByLikeLike(EnRu1* this, PlayState* play);
+
 void EnRu1_DrawNothing(EnRu1* this, PlayState* play);
 void EnRu1_DrawOpa(EnRu1* this, PlayState* play);
 void EnRu1_DrawXlu(EnRu1* this, PlayState* play);
@@ -118,7 +120,7 @@ static EnRu1ActionFunc sActionFuncs[] = {
     func_80AED414, func_80AEF29C, func_80AEF2AC, func_80AEF2D0, func_80AEF354, func_80AEF3A8, func_80AEEBD4,
     func_80AEEC5C, func_80AEECF0, func_80AEED58, func_80AEEDCC, func_80AEEE34, func_80AEEE9C, func_80AEEF08,
     func_80AEEF5C, func_80AEF9D8, func_80AEFA2C, func_80AEFAAC, func_80AEFB04, func_80AEFB68, func_80AEFCE8,
-    func_80AEFBC8, func_80AEFC24, func_80AEFECC, func_80AEFF40,
+    func_80AEFBC8, func_80AEFC24, func_80AEFECC, func_80AEFF40, EnRu1_SwallowedByLikeLike
 };
 
 static EnRu1PreLimbDrawFunc sPreLimbDrawFuncs[] = {
@@ -1587,6 +1589,14 @@ void func_80AEE568(EnRu1* this, PlayState* play) {
         if ((this->actor.bgCheckFlags & 1) && (this->actor.speedXZ == 0.0f) && (this->actor.minVelocityY == 0.0f)) {
             func_80AEE02C(this);
             Actor_OfferCarry(&this->actor, play);
+            
+            // Reset her to a harmless player projectile when she lands!
+            this->collider2.base.atFlags = AT_ON | AT_TYPE_PLAYER;
+            
+            // ADD THIS: Clear out the Like-Like's damage and effect
+            this->collider2.info.toucher.damage = 0;
+            this->collider2.info.toucher.effect = 0;
+            
             this->action = 27;
             func_80AEADD8(this);
         } else if (this->actor.yDistToWater > 0.0f) {
@@ -2221,6 +2231,29 @@ void func_80AF0050(EnRu1* this, PlayState* play) {
     this->roomNum1 = this->actor.room;
     this->unk_28C = EnRu1_FindSwitch(play);
     this->actor.room = -1;
+}
+
+void EnRu1_SwallowedByLikeLike(EnRu1* this, PlayState* play) {
+    // Disable colliders so she doesn't bump into walls or push Link away
+    this->collider.base.ocFlags1 &= ~OC1_ON;
+    this->collider2.base.ocFlags1 &= ~OC1_ON;
+    
+    // Turn off her attacks while being eaten so she doesn't hurt the Like-Like
+    this->collider2.base.atFlags &= ~AT_ON; 
+
+    // Clear physical momentum
+    this->actor.gravity = 0.0f;
+    this->actor.speedXZ = 0.0f;
+    this->actor.velocity.y = 0.0f;
+
+    // Play her squirming animation
+    if (this->skelAnime.animation != &gRutoChildSquirmAnim) {
+        Animation_Change(&this->skelAnime, &gRutoChildSquirmAnim, 1.5f, 0, 
+                         Animation_GetLastFrame(&gRutoChildSquirmAnim), ANIMMODE_LOOP, -4.0f);
+    }
+
+    EnRu1_UpdateSkelAnime(this);
+    EnRu1_UpdateEyes(this);
 }
 
 void EnRu1_Update(Actor* thisx, PlayState* play) {

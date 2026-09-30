@@ -532,34 +532,36 @@ s32 EnZf_CanAttack(PlayState* play, EnZf* this) {
     Actor* targetedActor;
     Player* player = GET_PLAYER(play);
 
-    if (this->actor.params >= ENZF_TYPE_LIZALFOS_MINIBOSS_A) { // miniboss
-        if (player->stateFlags1 &
-            (PLAYER_STATE1_HANGING_OFF_LEDGE | PLAYER_STATE1_CLIMBING_LEDGE)) { // Hanging or climbing
-            return false;
-        } else {
-            return true;
-        }
-    } else {
-        if (!Actor_OtherIsTargeted(play, &this->actor)) {
-            return true;
-        }
-        if (this->actor.params == ENZF_TYPE_DINOLFOS) {
-            targetedActor = player->focusActor;
-            if (targetedActor == NULL) {
+    if (!player->swallowed) {
+        if (this->actor.params >= ENZF_TYPE_LIZALFOS_MINIBOSS_A) { // miniboss
+            if (player->stateFlags1 &
+                (PLAYER_STATE1_HANGING_OFF_LEDGE | PLAYER_STATE1_CLIMBING_LEDGE)) { // Hanging or climbing
                 return false;
             } else {
-                if (targetedActor->category != ACTORCAT_ENEMY) {
-                    return true;
-                }
-                if (targetedActor->id != ACTOR_EN_ZF) {
+                return true;
+            }
+        } else {
+            if (!Actor_OtherIsTargeted(play, &this->actor)) {
+                return true;
+            }
+            if (this->actor.params == ENZF_TYPE_DINOLFOS) {
+                targetedActor = player->focusActor;
+                if (targetedActor == NULL) {
                     return false;
-                } else if (targetedActor->colorFilterTimer != 0) {
-                    return true;
+                } else {
+                    if (targetedActor->category != ACTORCAT_ENEMY) {
+                        return true;
+                    }
+                    if (targetedActor->id != ACTOR_EN_ZF) {
+                        return false;
+                    } else if (targetedActor->colorFilterTimer != 0) {
+                        return true;
+                    }
                 }
             }
         }
+        return false;
     }
-    return false;
 }
 
 void func_80B44DC4(EnZf* this, PlayState* play) {

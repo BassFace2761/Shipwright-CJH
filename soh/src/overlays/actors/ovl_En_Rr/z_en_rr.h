@@ -96,16 +96,14 @@ typedef struct EnRr {
     bool vacuumCooldown;
     bool tryScoop;
     u8 grabState;        // Like reachState, moves through grabStates with unique functionality.
-    s8 grabDirection; // 1 = Head-first (from above), -1 = Feet-first (from below)
     bool storedPlayerIsFacing; // Determines player-to-Like Like facing direction at SetupGrab for use in ThrowPlayer.
     u8 throwStrength;    // Increases throw strength depending on length of grab.
-    bool midpointTrigger;   // Determines if drain types can start draining.
+    bool stealTrigger;   // Determines if steal/drain types can start draining.
     u8 damageRelease;  // True if damage while grabbing player. Forces throw and then damage function after.
     u8 eatenSword;
     u8 eatenShield;
     u8 eatenTunic;
     u8 eatenBoots;
-    u8 eatenStrength;
     u8 eatenItem;
     u8 eatenBottle;
     s8 msgEaten;    
